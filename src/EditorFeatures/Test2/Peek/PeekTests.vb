@@ -182,6 +182,42 @@ End Module
 
         End Sub
 
+        <WpfFact, Trait(Traits.Feature, Traits.Features.Peek)>
+        <WorkItem(27936, "https://github.com/dotnet/roslyn/issues/27936")>
+        <WorkItem(29523, "https://github.com/dotnet/roslyn/issues/29523")>
+        Public Sub TestPeekDefinitionWhenInvokedOnTupleLiteral()
+            Using workspace = TestWorkspace.Create(<Workspace>
+                                                       <Project Language="C#" CommonReferences="true">
+                                                           <Document>class C { ValueTuple&lt;int, int&gt; s = $$(1, 1); }</Document>
+                                                       </Project>
+                                                   </Workspace>)
+                Dim result = GetPeekResultCollection(workspace)
+
+                Assert.Equal(1, result.Items.Count)
+                Assert.Equal($"ValueTuple [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Label)
+                Assert.Equal($"ValueTuple [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Title)
+                Assert.True(result.GetRemainingIdentifierLineTextOnDisk(index:=0).StartsWith("ValueTuple<T1, T2>", StringComparison.Ordinal))
+            End Using
+        End Sub
+
+        <WpfFact, Trait(Traits.Feature, Traits.Features.Peek)>
+        <WorkItem(27936, "https://github.com/dotnet/roslyn/issues/27936")>
+        <WorkItem(29523, "https://github.com/dotnet/roslyn/issues/29523")>
+        Public Sub TestPeekDefinitionWhenInvokedOnTupleType()
+            Using workspace = TestWorkspace.Create(<Workspace>
+                                                       <Project Language="C#" CommonReferences="true">
+                                                           <Document>class C { V$$alueTuple&lt;int, int&gt; s = (1, 1); }</Document>
+                                                       </Project>
+                                                   </Workspace>)
+                Dim result = GetPeekResultCollection(workspace)
+
+                Assert.Equal(1, result.Items.Count)
+                Assert.Equal($"ValueTuple [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Label)
+                Assert.Equal($"ValueTuple [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Title)
+                Assert.True(result.GetRemainingIdentifierLineTextOnDisk(index:=0).StartsWith("ValueTuple<T1, T2>", StringComparison.Ordinal))
+            End Using
+        End Sub
+
         Private Function GetPeekResultCollection(element As XElement) As PeekResultCollection
             Using workspace = TestWorkspace.Create(element)
                 Return GetPeekResultCollection(workspace)
