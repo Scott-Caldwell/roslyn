@@ -76,7 +76,8 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
             bool completed = true,
             bool openDocuments = true,
             ExportProvider exportProvider = null,
-            string workspaceKind = null)
+            string workspaceKind = null,
+            IEnumerable<MetadataReference> metadataReferences = null)
         {
             if (workspaceElement.Name != WorkspaceElementName)
             {
@@ -104,7 +105,8 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
                     documentElementToFilePath,
                     filePathToTextBufferMap,
                     ref projectIdentifier,
-                    ref documentIdentifier);
+                    ref documentIdentifier,
+                    metadataReferences);
                 Assert.False(projectNameToTestHostProject.ContainsKey(project.Name), $"The workspace XML already contains a project with name {project.Name}");
                 projectNameToTestHostProject.Add(project.Name, project);
                 projectElementToProjectName.Add(projectElement, project.Name);
@@ -256,7 +258,8 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
             Dictionary<XElement, string> documentElementToFilePath,
             Dictionary<string, ITextBuffer> filePathToTextBufferMap,
             ref int projectId,
-            ref int documentId)
+            ref int documentId,
+            IEnumerable<MetadataReference> metadataReferences)
         {
             var language = GetLanguage(workspace, projectElement);
 
@@ -289,6 +292,7 @@ namespace Microsoft.CodeAnalysis.Editor.UnitTests.Workspaces
             var compilationOptions = CreateCompilationOptions(workspace, projectElement, language, parseOptions);
 
             var references = CreateReferenceList(workspace, projectElement);
+            references.AddRange(metadataReferences);
             var analyzers = CreateAnalyzerList(workspace, projectElement);
 
             var documents = new List<TestHostDocument>();

@@ -1,5 +1,6 @@
 ﻿' Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
 
+Imports System.Collections.Immutable
 Imports System.IO
 Imports System.Threading
 Imports Microsoft.CodeAnalysis.Editor.Host
@@ -10,6 +11,7 @@ Imports Microsoft.VisualStudio.Imaging.Interop
 Imports Microsoft.VisualStudio.Language.Intellisense
 Imports Microsoft.VisualStudio.Text
 Imports Moq
+Imports Roslyn.Utilities
 
 Namespace Microsoft.CodeAnalysis.Editor.UnitTests.Peek
     <[UseExportProvider]>
@@ -188,7 +190,14 @@ End Module
         Public Sub TestPeekDefinitionWhenInvokedOnTupleLiteral()
             Using workspace = TestWorkspace.Create(<Workspace>
                                                        <Project Language="C#" CommonReferences="true">
-                                                           <Document>class C { ValueTuple&lt;int, int&gt; s = $$(1, 1); }</Document>
+                                                           <Document>
+using System;
+                                                           
+class C
+{
+    ValueTuple&lt;int, int&gt; tuple = $$(1, 1);
+}
+                                                           </Document>
                                                        </Project>
                                                    </Workspace>)
                 Dim result = GetPeekResultCollection(workspace)
@@ -206,15 +215,47 @@ End Module
         Public Sub TestPeekDefinitionWhenInvokedOnTupleType()
             Using workspace = TestWorkspace.Create(<Workspace>
                                                        <Project Language="C#" CommonReferences="true">
-                                                           <Document>class C { V$$alueTuple&lt;int, int&gt; s = (1, 1); }</Document>
+                                                           <Document>
+using System;
+                                                           
+class C
+{
+    V$$alueTuple&lt;int, int&gt; tuple = (1, 1);
+}
+                                                           </Document>
                                                        </Project>
-                                                   </Workspace>)
+                                                   </Workspace>, metadataReferences:=ImmutableArray.Create(TestBase.ValueTupleRef, TestBase.SystemRuntimeFacadeRef))
+
                 Dim result = GetPeekResultCollection(workspace)
 
                 Assert.Equal(1, result.Items.Count)
                 Assert.Equal($"ValueTuple [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Label)
                 Assert.Equal($"ValueTuple [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Title)
                 Assert.True(result.GetRemainingIdentifierLineTextOnDisk(index:=0).StartsWith("ValueTuple<T1, T2>", StringComparison.Ordinal))
+            End Using
+        End Sub
+
+        <WpfFact, Trait(Traits.Feature, Traits.Features.Peek)>
+        <WorkItem(27936, "https://github.com/dotnet/roslyn/issues/27936")>
+        <WorkItem(29523, "https://github.com/dotnet/roslyn/issues/29523")>
+        Public Sub TestPeekDefinitionWhenInvokedOnSpanType()
+            Using workspace = TestWorkspace.Create(<Workspace>
+                                                       <Project Language="C#" CommonReferences="true">
+                                                           <Document>
+using System;
+                                                           
+ref struct S
+{
+    S$$pan&lt;int&gt; span;
+}</Document>
+                                                       </Project>
+                                                   </Workspace>)
+                Dim result = GetPeekResultCollection(workspace)
+
+                Assert.Equal(1, result.Items.Count)
+                Assert.Equal($"Span [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Label)
+                Assert.Equal($"Span [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Title)
+                Assert.True(result.GetRemainingIdentifierLineTextOnDisk(index:=0).StartsWith("Span<T>", StringComparison.Ordinal))
             End Using
         End Sub
 

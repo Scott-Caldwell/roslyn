@@ -118,7 +118,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                                              Location locationOpt = null,
                                              ImmutableArray<Location> elementLocations = default(ImmutableArray<Location>))
         {
-            return Create(locationOpt == null ? ImmutableArray<Location>.Empty : ImmutableArray.Create(locationOpt),
+            return Create(locationOpt == null ? tupleCompatibleType.Locations : ImmutableArray.Create(locationOpt),
                           tupleCompatibleType,
                           elementLocations,
                           elementNames,
