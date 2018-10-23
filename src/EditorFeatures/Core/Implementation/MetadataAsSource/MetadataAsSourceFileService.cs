@@ -183,7 +183,9 @@ namespace Microsoft.CodeAnalysis.Editor.Implementation.MetadataAsSource
 
             var documentName = string.Format(
                 "{0} [{1}]",
-                topLevelNamedType.Name,
+                topLevelNamedType.IsTupleType
+                    ? topLevelNamedType.TupleUnderlyingType.Name
+                    : topLevelNamedType.Name,
                 EditorFeaturesResources.from_metadata);
 
             var documentTooltip = topLevelNamedType.ToDisplayString(new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces));

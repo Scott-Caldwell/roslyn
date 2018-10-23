@@ -118,7 +118,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
                                              Location locationOpt = null,
                                              ImmutableArray<Location> elementLocations = default(ImmutableArray<Location>))
         {
-            return Create(locationOpt == null ? tupleCompatibleType.Locations : ImmutableArray.Create(locationOpt),
+            return Create(locationOpt == null ? ImmutableArray<Location>.Empty : ImmutableArray.Create(locationOpt),
                           tupleCompatibleType,
                           elementLocations,
                           elementNames,
@@ -1561,7 +1561,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Symbols
         {
             if (!type.IsErrorType() && type.IsTupleCompatible())
             {
-                tuple = TupleTypeSymbol.Create((NamedTypeSymbol)type);
+                tuple = TupleTypeSymbol.Create(type.Locations, (NamedTypeSymbol)type, default(ImmutableArray<Location>), type.TupleElementNames, default(ImmutableArray<bool>));
                 return true;
             }
 

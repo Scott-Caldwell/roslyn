@@ -235,30 +235,6 @@ class C
             End Using
         End Sub
 
-        <WpfFact, Trait(Traits.Feature, Traits.Features.Peek)>
-        <WorkItem(27936, "https://github.com/dotnet/roslyn/issues/27936")>
-        <WorkItem(29523, "https://github.com/dotnet/roslyn/issues/29523")>
-        Public Sub TestPeekDefinitionWhenInvokedOnSpanType()
-            Using workspace = TestWorkspace.Create(<Workspace>
-                                                       <Project Language="C#" CommonReferences="true">
-                                                           <Document>
-using System;
-                                                           
-ref struct S
-{
-    S$$pan&lt;int&gt; span;
-}</Document>
-                                                       </Project>
-                                                   </Workspace>)
-                Dim result = GetPeekResultCollection(workspace)
-
-                Assert.Equal(1, result.Items.Count)
-                Assert.Equal($"Span [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Label)
-                Assert.Equal($"Span [{EditorFeaturesResources.from_metadata}]", result(0).DisplayInfo.Title)
-                Assert.True(result.GetRemainingIdentifierLineTextOnDisk(index:=0).StartsWith("Span<T>", StringComparison.Ordinal))
-            End Using
-        End Sub
-
         Private Function GetPeekResultCollection(element As XElement) As PeekResultCollection
             Using workspace = TestWorkspace.Create(element)
                 Return GetPeekResultCollection(workspace)
