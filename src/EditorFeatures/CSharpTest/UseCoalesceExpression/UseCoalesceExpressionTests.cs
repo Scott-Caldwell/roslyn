@@ -492,5 +492,32 @@ class C
     }
 }");
         }
+
+        [WorkItem(28180, "https://github.com/dotnet/roslyn/issues/28180")]
+        [Fact, Trait(Traits.Feature, Traits.Features.CodeActionsUseCoalesceExpression)]
+        public async Task TestOnAsExpression()
+        {
+            await TestInRegularAndScriptAsync(
+@"
+class C
+{
+    void Main(object t)
+    {
+        var c = t as C;
+        [|if|] (c == null)
+        {
+            throw new Exception();
+        }
+    }
+}",
+@"
+class C
+{
+    void Main(object t)
+    {
+        var c = t as C ?? throw new Exception();
+    }
+}");
+        }
     }
 }
