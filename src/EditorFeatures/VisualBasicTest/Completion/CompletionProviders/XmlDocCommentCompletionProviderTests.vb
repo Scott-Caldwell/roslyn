@@ -760,6 +760,7 @@ End Class
         End Function
 
         <WorkItem(11490, "https://github.com/dotnet/roslyn/issues/11490")>
+        <WorkItem(25671, "https://github.com/dotnet/roslyn/issues/25671")>
         <Fact, Trait(Traits.Feature, Traits.Features.Completion)>
         Public Async Function TestSeeAttributeNames() As Task
             Dim text = "
@@ -771,7 +772,7 @@ Class C
     End Sub
 End Class
 "
-            Await VerifyItemsExistAsync(text, "cref", "langword")
+            Await VerifyItemsExistAsync(text, "cref", "href", "langword")
         End Function
 
         <WorkItem(22789, "https://github.com/dotnet/roslyn/issues/22789")>
