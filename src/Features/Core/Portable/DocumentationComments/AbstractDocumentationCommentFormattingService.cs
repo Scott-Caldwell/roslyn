@@ -199,7 +199,9 @@ namespace Microsoft.CodeAnalysis.DocumentationComments
             {
                 var displayKind = attributeName == "langword"
                     ? TextTags.Keyword
-                    : TextTags.Text;
+                    : attributeName == "href"
+                        ? TextTags.UrlHyperlink
+                        : TextTags.Text;
                 state.AppendParts(SpecializedCollections.SingletonEnumerable(new TaggedText(displayKind, attribute.Value)));
             }
         }

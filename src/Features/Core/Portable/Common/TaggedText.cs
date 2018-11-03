@@ -139,6 +139,9 @@ namespace Microsoft.CodeAnalysis
                 case TextTags.Text:
                     return ClassificationTypeNames.Text;
 
+                case TextTags.UrlHyperlink:
+                    return ClassificationTypeNames.UrlHyperlink;
+
                 default:
                     throw ExceptionUtilities.UnexpectedValue(taggedTextTag);
             }

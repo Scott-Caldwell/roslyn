@@ -46,6 +46,7 @@ namespace Microsoft.CodeAnalysis.Completion.Providers
                 new[] { ExceptionElementName, CrefAttributeName, $"{CrefAttributeName}=\"", "\"" },
                 new[] { PermissionElementName, CrefAttributeName, $"{CrefAttributeName}=\"", "\"" },
                 new[] { SeeElementName, CrefAttributeName, $"{CrefAttributeName}=\"", "\"" },
+                new[] { SeeElementName, HrefAttributeName, $"{HrefAttributeName}=\"", "\"" },
                 new[] { SeeElementName, LangwordAttributeName, $"{LangwordAttributeName}=\"", "\"" },
                 new[] { SeeAlsoElementName, CrefAttributeName, $"{CrefAttributeName}=\"", "\"" },
                 new[] { ListElementName, TypeAttributeName, $"{TypeAttributeName}=\"", "\"" },

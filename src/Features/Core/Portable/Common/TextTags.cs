@@ -35,6 +35,7 @@ namespace Microsoft.CodeAnalysis
         public const string AnonymousTypeIndicator = nameof(AnonymousTypeIndicator);
         public const string Text = nameof(Text);
         public const string TypeParameter = nameof(TypeParameter);
+        public const string UrlHyperlink = nameof(UrlHyperlink);
         public const string RangeVariable = nameof(RangeVariable);
     }
 }

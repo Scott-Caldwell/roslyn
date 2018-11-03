@@ -14,6 +14,7 @@ namespace Microsoft.CodeAnalysis.Classification
         public const string StringLiteral = "string";
         public const string WhiteSpace = "whitespace";
         public const string Text = "text";
+        public const string UrlHyperlink = "url hyperlink";
 
         public const string PreprocessorText = "preprocessor text";
         public const string Punctuation = "punctuation";

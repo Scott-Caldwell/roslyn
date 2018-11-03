@@ -10,6 +10,7 @@ const Microsoft.CodeAnalysis.Classification.ClassificationTypeNames.RegexQuantif
 const Microsoft.CodeAnalysis.Classification.ClassificationTypeNames.RegexSelfEscapedCharacter = "regex - self escaped character" -> string
 const Microsoft.CodeAnalysis.Classification.ClassificationTypeNames.RegexText = "regex - text" -> string
 const Microsoft.CodeAnalysis.Classification.ClassificationTypeNames.StringEscapeCharacter = "string - escape character" -> string
+const Microsoft.CodeAnalysis.Classification.ClassificationTypeNames.UrlHyperlink = "url hyperlink" -> string
 const Microsoft.CodeAnalysis.WorkspaceKind.MSBuild = "MSBuildWorkspace" -> string
 Microsoft.CodeAnalysis.CodeStyle.NotificationOption.Severity.get -> Microsoft.CodeAnalysis.ReportDiagnostic
 Microsoft.CodeAnalysis.CodeStyle.NotificationOption.Severity.set -> void

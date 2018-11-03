@@ -18,6 +18,7 @@ Microsoft.CodeAnalysis.QuickInfo.QuickInfoSection.Text.get -> string
 Microsoft.CodeAnalysis.QuickInfo.QuickInfoSectionKinds
 Microsoft.CodeAnalysis.QuickInfo.QuickInfoService
 Microsoft.CodeAnalysis.QuickInfo.QuickInfoService.QuickInfoService() -> void
+const Microsoft.CodeAnalysis.TextTags.UrlHyperlink = "UrlHyperlink" -> string
 static Microsoft.CodeAnalysis.QuickInfo.QuickInfoItem.Create(Microsoft.CodeAnalysis.Text.TextSpan span, System.Collections.Immutable.ImmutableArray<string> tags = default(System.Collections.Immutable.ImmutableArray<string>), System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.QuickInfo.QuickInfoSection> sections = default(System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.QuickInfo.QuickInfoSection>), System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Text.TextSpan> relatedSpans = default(System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.Text.TextSpan>)) -> Microsoft.CodeAnalysis.QuickInfo.QuickInfoItem
 static Microsoft.CodeAnalysis.QuickInfo.QuickInfoSection.Create(string kind, System.Collections.Immutable.ImmutableArray<Microsoft.CodeAnalysis.TaggedText> taggedParts) -> Microsoft.CodeAnalysis.QuickInfo.QuickInfoSection
 static Microsoft.CodeAnalysis.QuickInfo.QuickInfoService.GetService(Microsoft.CodeAnalysis.Document document) -> Microsoft.CodeAnalysis.QuickInfo.QuickInfoService
