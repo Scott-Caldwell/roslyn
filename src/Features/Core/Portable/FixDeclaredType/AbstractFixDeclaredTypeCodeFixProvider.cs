@@ -36,7 +36,10 @@ namespace Microsoft.CodeAnalysis.FixDeclaredType
             var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
             var syntaxFacts = document.GetLanguageService<ISyntaxFactsService>();
 
-            var (existingMethodSyntax, methodReturnType) = TryGetContextInfo(root, context.Span, semanticModel, cancellationToken);
+            var diagnostic = context.Diagnostics.First();
+            var initialNode = root.FindNode(diagnostic.Location.SourceSpan);
+
+            var (existingMethodSyntax, methodReturnType) = TryGetContextInfo(initialNode, semanticModel, cancellationToken);
 
             if (existingMethodSyntax is null || methodReturnType is null
                 || methodReturnType.TypeKind == TypeKind.Dynamic)
@@ -45,21 +48,23 @@ namespace Microsoft.CodeAnalysis.FixDeclaredType
             }
 
             var (returnStatementNode, statementType) = TryGetReturnInfo(
-                root, context.Span, syntaxFacts, semanticModel, cancellationToken);
+                initialNode, syntaxFacts, semanticModel, cancellationToken);
 
-            if (returnStatementNode is null || statementType is null 
-                || statementType.IsAnonymousType || statementType.TypeKind == TypeKind.Dynamic)
+            if (returnStatementNode is null || statementType is null
+                || statementType.TypeKind == TypeKind.Dynamic)
             {
                 return;
             }
 
             var commonType = GetCommonBaseType(methodReturnType, statementType);
 
-            var newReturnType = commonType.SpecialType == SpecialType.System_Object
+            var candidateReturnType = commonType.SpecialType == SpecialType.System_Object && !statementType.IsAnonymousType
                 ? statementType
                 : commonType;
 
-            var newMethodSyntax = ChangeReturnType(semanticModel, existingMethodSyntax, newReturnType);
+            var newReturnType = ResolveTypeForMethod(syntaxFacts, candidateReturnType);
+
+            var newMethodSyntax = ChangeReturnType(semanticModel, existingMethodSyntax, candidateReturnType);
 
             var codeActions = GetCodeActions(document, root, existingMethodSyntax, newMethodSyntax);
 
@@ -71,32 +76,15 @@ namespace Microsoft.CodeAnalysis.FixDeclaredType
 
         protected abstract TMethodReturnTypeSyntax GetMethodReturnType(TMethodDeclarationSyntax methodDeclaration);
 
-        private SyntaxToken GetToken(SyntaxNode root, TextSpan span)
-        {
-            var position = span.Start;
-            var token = root.FindToken(position);
-
-            if (!token.Span.IntersectsWith(position))
-            {
-                return default;
-            }
-
-            if (!span.IsEmpty && span != token.Span)
-            {
-                return default;
-            }
-
-            return token;
-        }
+        protected abstract INamedTypeSymbol ResolveTypeForMethod(
+            ISyntaxFactsService syntaxFacts, TMethodDeclarationSyntax method, INamedTypeSymbol candidateReturnType);
 
         private (TMethodDeclarationSyntax, INamedTypeSymbol) TryGetContextInfo(
-            SyntaxNode root, TextSpan span, SemanticModel semanticModel, CancellationToken cancellationToken)
+            SyntaxNode initialNode, SemanticModel semanticModel, CancellationToken cancellationToken)
         {
-            var token = GetToken(root, span);
-
-            for (var currentToken = token; currentToken.RawKind != 0; currentToken = currentToken.GetPreviousToken())
+            for (var currentNode = initialNode; currentNode != null; currentNode = currentNode.Parent)
             {
-                if (currentToken.Parent is TMethodDeclarationSyntax methodDeclaration)
+                if (currentNode is TMethodDeclarationSyntax methodDeclaration)
                 {
                     var returnTypeSyntax = GetMethodReturnType(methodDeclaration);
                     var returnType = semanticModel.GetTypeInfo(returnTypeSyntax, cancellationToken).Type as INamedTypeSymbol;
@@ -109,12 +97,10 @@ namespace Microsoft.CodeAnalysis.FixDeclaredType
         }
 
         private (TReturnStatementSyntax, INamedTypeSymbol) TryGetReturnInfo(
-            SyntaxNode root, TextSpan span, ISyntaxFactsService syntaxFacts, SemanticModel semanticModel,
+            SyntaxNode initialNode, ISyntaxFactsService syntaxFacts, SemanticModel semanticModel,
             CancellationToken cancellationToken)
         {
-            var token = GetToken(root, span);
-
-            var returnStatementNode = token.Parent as TReturnStatementSyntax;
+            var returnStatementNode = initialNode.GetAncestorOrThis<TReturnStatementSyntax>();
             if (returnStatementNode is null)
             {
                 return default;
@@ -129,16 +115,24 @@ namespace Microsoft.CodeAnalysis.FixDeclaredType
 
         private INamedTypeSymbol GetCommonBaseType(INamedTypeSymbol methodReturnType, INamedTypeSymbol statementReturnType)
         {
-            var methodReturnTypeBaseTypes = methodReturnType.GetBaseTypesAndThis().Concat(methodReturnType.AllInterfaces);
-            var statementReturnTypeBaseTypes = statementReturnType.GetBaseTypesAndThis().Concat(statementReturnType.AllInterfaces);
+            var statementReturnTypeBaseTypes = statementReturnType.GetBaseTypesAndThis();
 
-            // We want to find the least-derived base of the method return type
-            // that also suits the return statement return type.
-            foreach (var methodReturnTypeBaseType in methodReturnTypeBaseTypes.Where(t => t.SpecialType != SpecialType.System_ValueType))
+            // Need to get the least-derived base type of the method return type
+            // that also suits the statement type.
+            foreach (var currentType in methodReturnType.GetBaseTypesAndThis()
+                                                        .Where(t => t.SpecialType != SpecialType.System_ValueType))
             {
-                if (statementReturnTypeBaseTypes.Contains(t => SymbolEquivalenceComparer.Instance.Equals(t, methodReturnTypeBaseType)))
+                if (statementReturnTypeBaseTypes.Contains(t => SymbolEquivalenceComparer.Instance.Equals(currentType, t)))
                 {
-                    return methodReturnTypeBaseType;
+                    return currentType;
+                }
+
+                foreach (var currentInterface in currentType.Interfaces)
+                {
+                    if (statementReturnType.AllInterfaces.Contains(t => SymbolEquivalenceComparer.Instance.Equals(currentInterface, t)))
+                    {
+                        return currentInterface;
+                    }
                 }
             }
 

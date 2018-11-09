@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.FixDeclaredType;
+using Microsoft.CodeAnalysis.LanguageServices;
 
 namespace Microsoft.CodeAnalysis.CSharp.FixDeclaredType
 {
@@ -18,10 +19,22 @@ namespace Microsoft.CodeAnalysis.CSharp.FixDeclaredType
         MethodDeclarationSyntax,
         TypeSyntax>
     {
+        private const string CS0029 = nameof(CS0029); // Cannot implicitly convert type 'type' to 'type'
         private const string CS0127 = nameof(CS0127); // Since 'function' returns void, a return keyword must not be followed by an object expression
+        private const string CS0266 = nameof(CS0266); // Cannot implicitly convert type 'type' to 'type'. An explicit conversion exists (are you missing a cast?)
 
         public override ImmutableArray<string> FixableDiagnosticIds { get; } = ImmutableArray.Create(
-            CS0127);
+            CS0029,
+            CS0127,
+            CS0266);
+
+        protected override INamedTypeSymbol ResolveTypeForMethod(ISyntaxFactsService syntaxFacts, MethodDeclarationSyntax method, INamedTypeSymbol candidateReturnType)
+        {
+            if ()
+            {
+
+            }
+        }
 
         protected override MethodDeclarationSyntax ChangeReturnType(
             SemanticModel semanticModel, MethodDeclarationSyntax currentMethod, INamedTypeSymbol newReturnType)
